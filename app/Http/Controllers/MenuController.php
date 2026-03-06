@@ -98,6 +98,7 @@ class MenuController extends Controller
     if (isset($cart[$menuId])) {
       unset($cart[$menuId]);
       Session::put('cart', $cart);
+      Session::flash('success', 'Item berhasil dihapus dari keranjang');
 
       return response()->json([
         'status' => 'success',
