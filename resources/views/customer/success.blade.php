@@ -47,7 +47,7 @@
 
     @if($order->payment_method == 'tunai')
       <p class="small text-center">Tunjukkan kode bayar ini ke kasir untuk menyelesaikan pembayaran</p>
-      @elseif($payment_method == 'tunai')
+      @elseif($order->payment_method == 'tunai')
       <p class="small text-center">Yeay! Pembayaran sukses. Duduk manis yaa, pesanan kamu segera kami proses!</p>
     @endif
     <hr>
