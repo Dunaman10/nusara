@@ -21,4 +21,11 @@ Route::post('/checkout/store', [MenuController::class, 'storeOrder'])->name('che
 Route::get('/checkout/success/{orderId}', [MenuController::class, 'checkoutSuccess'])->name('checkout.success');
 
 // Admin Routes
+Route::get('/dashboard', function () {
+  return view('admin.dashboard');
+})->name('dashboard');
 Route::resource('categories', CategoryController::class);
+Route::resource('items', CategoryController::class);
+Route::resource('roles', CategoryController::class);
+Route::resource('users', CategoryController::class);
+Route::resource('orders', CategoryController::class);
