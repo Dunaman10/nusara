@@ -1,7 +1,11 @@
 <?php
 
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ItemController;
 use App\Http\Controllers\MenuController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -25,7 +29,7 @@ Route::get('/dashboard', function () {
   return view('admin.dashboard');
 })->name('dashboard');
 Route::resource('categories', CategoryController::class);
-Route::resource('items', CategoryController::class);
-Route::resource('roles', CategoryController::class);
-Route::resource('users', CategoryController::class);
-Route::resource('orders', CategoryController::class);
+Route::resource('items', ItemController::class);
+Route::resource('roles', RoleController::class);
+Route::resource('users', UserController::class);
+Route::resource('orders', OrderController::class);
