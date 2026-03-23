@@ -141,6 +141,13 @@ class ItemController extends Controller
    */
   public function destroy(string $id)
   {
-    //
+    // Find the item by ID
+    $item = Item::findOrFail($id);
+
+    // Delete the item
+    $item->delete();
+
+    // Redirect to the item index page with a success message
+    return redirect()->route('items.index')->with('success', 'Item deleted successfully.');
   }
 }
