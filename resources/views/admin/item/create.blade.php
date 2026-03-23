@@ -14,7 +14,7 @@
     </div>
 
     <div class="card-body">
-      <form class="for" action="{{ route('items.store') }}" enctype="multipart/form-data">
+      <form class="for" action="{{ route('items.store') }}" enctype="multipart/form-data" method="post">
         @csrf
         <div class="form-body">
           <div class="row">
@@ -45,8 +45,8 @@
               </div>
 
               <div class="form-group">
-                <label for="image">Gambar</label>
-                <input type="file" class="form-control" id="image" name="image" required>
+                <label for="img">Gambar</label>
+                <input type="file" class="form-control" id="img" name="img" required>
               </div>
 
               <div class="form-group">
