@@ -1,5 +1,5 @@
 @extends('admin.layouts.master')
-@section('title', 'Daftar Role')
+@section('title', 'Daftar Karyawan')
 
 @section('css')
 <link rel="stylesheet" href={{ asset('assets/admin/extensions/simple-datatables/style.css') }}>
