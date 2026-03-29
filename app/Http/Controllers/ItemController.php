@@ -150,4 +150,13 @@ class ItemController extends Controller
     // Redirect to the item index page with a success message
     return redirect()->route('items.index')->with('success', 'Item deleted successfully.');
   }
+
+  public function updateStatus($id)
+  {
+    $item = Item::findOrFail($id);
+    $item->is_active = !$item->is_active; // Toggle the status
+    $item->save();
+
+    return redirect()->route('items.index')->with('success', 'Item status updated successfully.');
+  }
 }

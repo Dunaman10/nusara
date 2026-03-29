@@ -67,13 +67,31 @@
                     <a href="{{ route('items.edit', $item->id) }}" class="btn btn-warning btn-sm">
                       <i class="bi bi-pencil"></i> Ubah
                     </a>
-                    <form method="POST" action="{{ route('items.destroy', $item->id) }}">
+                    @if($item->is_active == 1)
+                      <form action="{{ route('items.updateStatus', $item->id) }}" method="POST" class="d-inline">
+                        @csrf
+                        <input type="hidden" name="is_active" value="0">
+                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Apakah Anda yakin ingin nonaktifkan?')">
+                          <i class="bi bi-x-circle"></i> Nonaktifkan
+                        </button>
+                      </form>
+
+                    @else
+                      <form action="{{ route('items.updateStatus', $item->id) }}" method="POST" class="d-inline">
+                        @csrf
+                        <input type="hidden" name="is_active" value="1">
+                        <button type="submit" class="btn btn-success btn-sm" onclick="return confirm('Apakah Anda yakin ingin aktifkan?')">
+                          <i class="bi bi-check-circle"></i> Aktifkan
+                        </button>
+                      </form>
+                    @endif
+                    {{-- <form method="POST" action="{{ route('items.destroy', $item->id) }}">
                       @csrf
                       @method('DELETE')
                       <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Apakah Anda yakin ingin hapus?')">
                         <i class="bi bi-trash"></i> Hapus
                       </button>
-                    </form>
+                    </form> --}}
                   </td>
                 </tr>
               @endforeach
