@@ -21,4 +21,14 @@ class OrderController extends Controller
 
     return view('admin.order.show', compact('order', 'orderItems'));
   }
+
+  public function settlement($id)
+  {
+    $order = Order::findOrFail($id);
+
+    $order->status = 'settlement';
+    $order->save();
+
+    return redirect()->route('orders.index')->with('success', 'Pembayaran berhasil diterima.');
+  }
 }
