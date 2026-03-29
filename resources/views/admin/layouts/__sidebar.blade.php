@@ -115,6 +115,17 @@
             <span>Manajemen Kategori</span>
           </a>
         </li>
+
+        <li class="sidebar-item">
+          <form action="{{ route('logout') }}" method="post" onclick="event.preventDefault(); this.closest('form').submit();">
+            @csrf
+            <a href="{{ route('logout') }}" class="sidebar-link">
+              <i class="bi bi-box-arrow-right"></i>
+              <span>{{ __('Log Out') }}</span>
+            </a>
+          </form>
+        </li>
+
       </ul>
     </div>
   </div>
