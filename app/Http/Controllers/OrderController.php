@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\OrderItem;
+use Illuminate\Support\Facades\Auth;
 
 class OrderController extends Controller
 {
@@ -22,13 +23,17 @@ class OrderController extends Controller
     return view('admin.order.show', compact('order', 'orderItems'));
   }
 
-  public function settlement($id)
+  public function updateStatus($id)
   {
     $order = Order::findOrFail($id);
 
-    $order->status = 'settlement';
+    if (Auth::user()->role->role_name == 'admin' || Auth::user()->role->role_name == 'cashier') {
+      $order->status = 'settlement';
+    } elseif (Auth::user()->role->role_name == 'chef') {
+      $order->status = 'cooked';
+    }
     $order->save();
 
-    return redirect()->route('orders.index')->with('success', 'Pembayaran berhasil diterima.');
+    return redirect()->route('orders.index')->with('success', 'Status pesanan berhasil diperbarui.');
   }
 }
