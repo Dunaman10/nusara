@@ -16,12 +16,23 @@ class MenuController extends Controller
 {
   public function index(Request $request)
   {
-    $tableNumber = $request->query('meja');
+    $tableNumber = $request->query('table');
+    $restaurantId = $request->query('restaurant');
+    
     if ($tableNumber) {
       Session::put('tableNumber', $tableNumber);
     }
+    if ($restaurantId) {
+      Session::put('restaurantId', $restaurantId);
+    }
 
-    $items = Item::where('is_active', 1)->orderBy('name', 'asc')->get();
+    $restaurantIdFromSession = Session::get('restaurantId');
+
+    $itemsQuery = Item::where('is_active', 1);
+    if ($restaurantIdFromSession) {
+      $itemsQuery->where('restaurant_id', $restaurantIdFromSession);
+    }
+    $items = $itemsQuery->orderBy('name', 'asc')->get();
 
     return view('customer.menu', compact('items', 'tableNumber'));
   }
@@ -140,6 +151,8 @@ class MenuController extends Controller
   {
     $cart = Session::get('cart');
     $tableNumber = Session::get('tableNumber');
+    $restaurantId = Session::get('restaurantId');
+    
     if (empty($cart)) {
       return redirect()->route('cart')->with('error', 'Keranjang masih kosong');
     }
@@ -175,11 +188,13 @@ class MenuController extends Controller
       'fullname' => $request->input('fullname'),
       'phone' => $request->input('phone'),
       'role_id' => 4, // Role pelanggan
+      'restaurant_id' => $restaurantId,
     ]);
 
     $order = Order::create([
       'order_code' => 'ORD-' . $tableNumber . '-' . time(),
       'user_id' => $user->id,
+      'restaurant_id' => $restaurantId,
       'subtotal' => $totalAmount,
       'tax' => $totalAmount * 0.1, // Hitung pajak 10%
       'grand_total' => $totalAmount + ($totalAmount * 0.1), // Total dengan pajak
@@ -203,6 +218,7 @@ class MenuController extends Controller
     Session::forget('cart');
 
     if ($request->payment_method == 'tunai') {
+      Session::put('active_tunai_order', $order->order_code);
       return redirect()->route('checkout.success', ['orderId' => $order->order_code])->with('success', 'Pesanan berhasil dibuat. Terima kasih!');
     } else {
       Config::$serverKey = config('midtrans.server_key');

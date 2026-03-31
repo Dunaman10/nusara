@@ -61,7 +61,7 @@
                 <div
                   class="col-md-4 col-lg-12 col-xl-12 col-xxl-5 d-flex justify-content-start"
                 >
-                  <div class="stats-icon green mb-2">
+                  <div class="stats-icon purple mb-2">
                     <i class="iconly-boldFolder"></i>
                   </div>
                 </div>

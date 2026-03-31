@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Item;
+use App\Models\Restaurant;
 use Illuminate\Http\Request;
 
 class ItemController extends Controller
@@ -13,7 +14,7 @@ class ItemController extends Controller
    */
   public function index()
   {
-    $items = Item::orderBy('name', 'asc')->get();
+    $items = Item::with(['category', 'restaurant'])->orderBy('name', 'asc')->get();
 
     return view('admin.item.index', compact('items'));
   }
@@ -24,9 +25,10 @@ class ItemController extends Controller
   public function create()
   {
 
-    $categories = Category::orderBy('cat_name', 'asc')->get();
+    $categories = Category::with('restaurant')->orderBy('cat_name', 'asc')->get();
+    $restaurants = Restaurant::where('is_active', 1)->get();
 
-    return view('admin.item.create', compact('categories'));
+    return view('admin.item.create', compact('categories', 'restaurants'));
   }
 
   /**
@@ -41,6 +43,7 @@ class ItemController extends Controller
         'description' => 'nullable|string',
         'price' => 'required|numeric|min:0',
         'category_id' => 'required|exists:categories,id',
+        'restaurant_id' => 'required|exists:restaurants,id',
         'img' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         'is_active' => 'required|boolean',
       ],
@@ -49,6 +52,7 @@ class ItemController extends Controller
         'description.string' => 'The description must be a string',
         'price.required' => 'The item price is required',
         'category_id.required' => 'The item category is required',
+        'restaurant_id.required' => 'The restaurant is required',
         'img.image' => 'The item image must be an image file',
         'img.max' => 'The item image must not exceed 2MB',
         'is_active.required' => 'The item status is required',
@@ -86,8 +90,9 @@ class ItemController extends Controller
   {
     $item = Item::findOrFail($id);
     $categories = Category::orderBy('cat_name', 'asc')->get();
+    $restaurants = Restaurant::where('is_active', 1)->get();
 
-    return view('admin.item.edit', compact('item', 'categories'));
+    return view('admin.item.edit', compact('item', 'categories', 'restaurants'));
   }
 
   /**
@@ -102,6 +107,7 @@ class ItemController extends Controller
         'description' => 'nullable|string',
         'price' => 'required|numeric|min:0',
         'category_id' => 'required|exists:categories,id',
+        'restaurant_id' => 'required|exists:restaurants,id',
         'img' => 'sometimes|image|mimes:jpeg,png,jpg,gif|max:2048',
         'is_active' => 'required|boolean',
       ],
@@ -110,6 +116,7 @@ class ItemController extends Controller
         'description.string' => 'The description must be a string',
         'price.required' => 'The item price is required',
         'category_id.required' => 'The item category is required',
+        'restaurant_id.required' => 'The restaurant is required',
         'img.image' => 'The item image must be an image file',
         'img.max' => 'The item image must not exceed 2MB',
         'is_active.required' => 'The item status is required',

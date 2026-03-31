@@ -1,5 +1,5 @@
 @extends('admin.layouts.master')
-@section('title', 'Daftar Kategori')
+@section('title', 'Daftar Restoran')
 
 @section('css')
 <link rel="stylesheet" href={{ asset('assets/admin/extensions/simple-datatables/style.css') }}>
@@ -11,12 +11,12 @@
     <div class="page-title">
         <div class="row">
             <div class="col-12 col-md-6 order-md-1 order-last">
-                <h3>Manajemen Kategori</h3>
-                <p class="text-subtitle text-muted">Informasi Kategori yang Terdaftar</p>
+                <h3>Manajemen Restoran</h3>
+                <p class="text-subtitle text-muted">Daftar Restoran (Tenant)</p>
             </div>
             <div class="col-12 col-md-6 order-md-2 order-first">
-                <a href="{{ route('categories.create') }}" class="btn btn-primary float-lg-end">
-                  <i class="bi bi-plus"></i> Tambah Kategori
+                <a href="{{ route('restaurants.create') }}" class="btn btn-primary float-lg-end">
+                  <i class="bi bi-plus"></i> Tambah Restoran
                 </a>
             </div>
         </div>
@@ -25,7 +25,7 @@
       <div class="card">
         <div class="card-body">
           @if(session('success'))
-            <div class="alert alert-success alert-dismissible fade show" role="alert" role="alert">
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
               <p><i class="bi bi-check-circle-fill"></i> {{ session('success') }}</p>
               <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
@@ -34,28 +34,36 @@
             <thead>
               <tr>
                 <th>No</th>
-                <th>Restoran</th>
-                <th>Nama Kategori</th>
-                <th>Deskripsi</th>
+                <th>Nama Restoran</th>
+                <th>Slug</th>
+                <th>Alamat</th>
+                <th>Status</th>
                 <th>Aksi</th>
               </tr>
             </thead>
             <tbody>
-              @foreach ($categories as $category)
+              @foreach ($restaurants as $restaurant)
                 <tr>
                   <td>{{ $loop->iteration }}</td>
-                  <td><span class="badge bg-secondary">{{ $category->restaurant->name ?? '-' }}</span></td>
-                  <td>{{ $category->cat_name }}</td>
-                  <td>{{ $category->description }}</td>
+                  <td>{{ $restaurant->name }}</td>
+                  <td>{{ $restaurant->slug }}</td>
+                  <td>{{ Str::limit($restaurant->address, 30) }}</td>
+                  <td>
+                    @if($restaurant->is_active)
+                      <span class="badge bg-success">Aktif</span>
+                    @else
+                      <span class="badge bg-danger">Nonaktif</span>
+                    @endif
+                  </td>
                   <td class="d-flex gap-2">
-                    <a href="{{ route('categories.edit', $category->id) }}" class="btn btn-warning btn-sm">
-                      <i class="bi bi-pencil"></i> Ubah
+                    <a href="{{ route('restaurants.edit', $restaurant->id) }}" class="btn btn-warning btn-sm">
+                      <i class="bi bi-pencil"></i>
                     </a>
-                    <form method="POST" action="{{ route('categories.destroy', $category->id) }}">
+                    <form method="POST" action="{{ route('restaurants.destroy', $restaurant->id) }}">
                       @csrf
                       @method('DELETE')
-                      <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Apakah Anda yakin ingin hapus?')">
-                        <i class="bi bi-trash"></i> Hapus
+                      <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Hapus restoran ini? Semua tabel yang terhubung mungkin terdampak.')">
+                        <i class="bi bi-trash"></i>
                       </button>
                     </form>
                   </td>
@@ -70,6 +78,6 @@
 @endsection
 
 @section('script')
-<script src={{ asset('assets/admin/exstensions/simple-datatables/umd/simple-datatables.js') }}></script>
+<script src={{ asset('assets/admin/extensions/simple-datatables/umd/simple-datatables.js') }}></script>
 <script src={{ asset('assets/admin/static/js/pages/simple-datatables.js') }}></script>
 @endsection

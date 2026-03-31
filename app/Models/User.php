@@ -19,6 +19,7 @@ class User extends Authenticatable
     'email',
     'phone',
     'role_id',
+    'restaurant_id',
     'created_at',
     'updated_at',
   ];
@@ -33,5 +34,10 @@ class User extends Authenticatable
   public function orders()
   {
     return $this->hasMany(Order::class);
+  }
+
+  public function restaurant()
+  {
+    return $this->belongsTo(Restaurant::class);
   }
 }

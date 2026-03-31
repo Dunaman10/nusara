@@ -11,7 +11,7 @@ class Order extends Model
 {
   use SoftDeletes, HasFactory;
 
-  protected $fillable = ['order_code', 'user_id', 'subtotal', 'tax', 'grand_total', 'status', 'table_number', 'payment_method', 'note', 'created_at', 'updated_at'];
+  protected $fillable = ['order_code', 'user_id', 'restaurant_id', 'subtotal', 'tax', 'grand_total', 'status', 'table_number', 'payment_method', 'note', 'created_at', 'updated_at'];
   protected $dates = ['deleted_at'];
 
   public function user()
@@ -22,5 +22,10 @@ class Order extends Model
   public function orderItems()
   {
     return $this->hasMany(OrderItem::class);
+  }
+
+  public function restaurant()
+  {
+    return $this->belongsTo(Restaurant::class);
   }
 }

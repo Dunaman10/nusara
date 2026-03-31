@@ -53,7 +53,15 @@
                   <td>{{ $order->user->fullname }}</td>
                   <td>{{ 'Rp.' . number_format($order->grand_total, 0, ',', '.') }}</td>
                   <td>
-                    <span class="badge {{ $order->status == 'cooked' ? 'bg-success' : ($order->status == 'pending' ? 'bg-warning' : 'bg-info') }}">
+                    @php
+                      $badgeClass = match($order->status) {
+                          'cooked'     => 'bg-success',
+                          'pending'    => 'bg-warning text-dark',
+                          'settlement' => 'bg-primary',
+                          default      => 'bg-secondary',
+                      };
+                    @endphp
+                    <span class="badge {{ $badgeClass }}">
                       {{ ucfirst($order->status) }}
                     </span>
                   </td>

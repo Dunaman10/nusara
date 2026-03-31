@@ -7,6 +7,8 @@ use App\Http\Controllers\MenuController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\RestaurantController;
+use App\Http\Controllers\TableController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -35,6 +37,11 @@ Route::middleware('role:admin')->group(function () {
   Route::resource('items', ItemController::class);
   Route::resource('roles', RoleController::class);
   Route::resource('users', UserController::class);
+  Route::resource('restaurants', RestaurantController::class);
+  Route::resource('tables', TableController::class);
+  Route::get('/tables/{table}/download-qr', [TableController::class, 'downloadQr'])->name('tables.downloadQr');
+  Route::post('/tables/{table}/regenerate-qr', [TableController::class, 'regenerateQr'])->name('tables.regenerateQr');
+  Route::get('/tables/{table}/print-qr', [TableController::class, 'printQr'])->name('tables.printQr');
 });
 
 Route::middleware('role:admin|cashier|chef')->group(function () {

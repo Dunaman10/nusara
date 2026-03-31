@@ -30,6 +30,16 @@
           <div class="row">
             <div class="col-md-12">
               <div class="form-group">
+                <label for="restaurant_id">Restoran</label>
+                <select id="restaurant_id" name="restaurant_id" class="form-select" required>
+                  <option value="" disabled selected>Pilih Restoran</option>
+                  @foreach ($restaurants as $r)
+                    <option value="{{ $r->id }}">{{ $r->name }}</option>
+                  @endforeach
+                </select>
+              </div>
+
+              <div class="form-group">
                 <label for="name">Nama Menu</label>
                 <input type="text" class="form-control" id="name" placeholder="masukkan name" name="name" required>
               </div>

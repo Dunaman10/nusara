@@ -96,7 +96,7 @@
         </li>
 
         @if(Auth::user()->role->role_name === 'admin')
-        <li class="sidebar-item {{ Route::is('users') ? 'active' : '' }}">
+        <li class="sidebar-item {{ Route::is('users.*') ? 'active' : '' }}">
           <a href="{{ route('users.index') }}" class="sidebar-link">
             <i class="bi bi-people-fill"></i>
             <span>Manajemen Karyawan</span>
@@ -114,6 +114,20 @@
           <a href="{{ route('categories.index') }}" class="sidebar-link">
             <i class="bi bi-tags-fill"></i>
             <span>Manajemen Kategori</span>
+          </a>
+        </li>
+
+        <li class="sidebar-item {{ Route::is('restaurants.*') ? 'active' : '' }}">
+          <a href="{{ route('restaurants.index') }}" class="sidebar-link">
+            <i class="bi bi-shop"></i>
+            <span>Manajemen Restoran</span>
+          </a>
+        </li>
+
+        <li class="sidebar-item {{ Route::is('tables.*') ? 'active' : '' }}">
+          <a href="{{ route('tables.index') }}" class="sidebar-link">
+            <i class="bi bi-grid-3x3-gap-fill"></i>
+            <span>Manajemen Meja</span>
           </a>
         </li>
         @endif

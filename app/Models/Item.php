@@ -10,7 +10,7 @@ class Item extends Model
 {
   use SoftDeletes, HasFactory;
 
-  protected $fillable = ['name', 'description', 'price', 'category_id', 'img', 'is_active', 'created_at' . 'updated_at'];
+  protected $fillable = ['name', 'description', 'price', 'category_id', 'restaurant_id', 'img', 'is_active', 'created_at' . 'updated_at'];
   protected $dates = ['deleted_at'];
 
   public function category()
@@ -21,5 +21,10 @@ class Item extends Model
   public function orderItems()
   {
     return $this->hasMany(OrderItem::class);
+  }
+
+  public function restaurant()
+  {
+    return $this->belongsTo(Restaurant::class);
   }
 }

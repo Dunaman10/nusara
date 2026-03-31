@@ -3,7 +3,10 @@
 
     <head>
         <meta charset="utf-8">
-        <title>Restoranku</title>
+        <title>Nusara</title>
+        <!-- Favicon / Brand Icon -->
+        <link rel="icon" type="image/png" href="{{ asset('build/assets/logo_nusara.png') }}">
+        <link rel="apple-touch-icon" href="{{ asset('build/assets/logo_nusara.png') }}">
         <meta content="width=device-width, initial-scale=1.0" name="viewport">
         <meta content="" name="keywords">
         <meta content="" name="description">

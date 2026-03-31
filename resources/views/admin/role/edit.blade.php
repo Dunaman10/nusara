@@ -43,7 +43,7 @@
                 <div class="form-group d-flex justify-content-end">
                 <button type="submit" class="btn btn-primary me-1 mb-1">Simpan</button>
                 <button type="reset" class="btn btn-light-secondary me-1 mb-1">Reset</button>
-                <a href="{{ route('items.index') }}" type="submit" class="btn btn-danger me-1 mb-1">Batal</a>
+                <a href="{{ route('roles.index') }}" type="submit" class="btn btn-danger me-1 mb-1">Batal</a>
               </div>
 
           </div>

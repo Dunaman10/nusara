@@ -35,6 +35,7 @@
               <tr>
                 <th>No</th>
                 <th>Gambar</th>
+                <th>Restoran</th>
                 <th>Nama Item</th>
                 <th>Deskripsi</th>
                 <th>Harga</th>
@@ -50,6 +51,7 @@
                   <td>
                     <img src="{{ asset('img_item_upload/'. $item->img) }}" width="60" class="img-fluid rounded-top" alt="" onerror="this.onerror=null;this.src='{{  $item->img }}';">
                   </td>
+                  <td><span class="badge bg-secondary">{{ $item->restaurant->name ?? '-' }}</span></td>
                   <td>{{ $item->name }}</td>
                   <td>{{ Str::limit($item->description, 15) }}</td>
                   <td>{{ 'Rp.' . number_format($item->price, 0, ',', '.') }}</td>

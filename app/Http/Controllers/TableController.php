@@ -1,0 +1,176 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Restaurant;
+use App\Models\Table;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+
+class TableController extends Controller
+{
+  /**
+   * Tampilkan daftar semua meja
+   */
+  public function index()
+  {
+    $restaurants = Restaurant::where('is_active', true)->get();
+    $tables = Table::with('restaurant')
+      ->when(request('restaurant_id'), function ($query) {
+        $query->where('restaurant_id', request('restaurant_id'));
+      })
+      ->orderBy('restaurant_id')
+      ->orderBy('name')
+      ->get();
+
+    return view('admin.table.index', compact('tables', 'restaurants'));
+  }
+
+  /**
+   * Form tambah meja baru
+   */
+  public function create()
+  {
+    $restaurants = Restaurant::where('is_active', true)->get();
+    return view('admin.table.create', compact('restaurants'));
+  }
+
+  /**
+   * Simpan meja baru dan generate QR Code
+   */
+  public function store(Request $request)
+  {
+    $request->validate([
+      'name'          => 'required|string|max:100',
+      'restaurant_id' => 'required|exists:restaurants,id',
+    ]);
+
+    // Simpan meja dahulu untuk mendapatkan ID
+    $table = Table::create([
+      'name'          => $request->name,
+      'restaurant_id' => $request->restaurant_id,
+      'is_active'     => $request->boolean('is_active', true),
+    ]);
+
+    // Generate URL QR code
+    $qrUrl = $table->generateQrUrl();
+
+    // Generate dan simpan gambar QR code
+    $qrPath = $table->generateAndSaveQrCode();
+
+    // Update meja dengan URL dan path QR code
+    $table->update([
+      'qr_code_url'  => $qrUrl,
+      'qr_code_path' => $qrPath,
+    ]);
+
+    return redirect()->route('tables.index')
+      ->with('success', "Meja \"{$table->name}\" berhasil dibuat beserta QR Code-nya.");
+  }
+
+  /**
+   * Tampilkan detail meja + QR Code
+   */
+  public function show(Table $table)
+  {
+    $table->load('restaurant');
+    return view('admin.table.show', compact('table'));
+  }
+
+  /**
+   * Form edit meja
+   */
+  public function edit(Table $table)
+  {
+    $restaurants = Restaurant::where('is_active', true)->get();
+    return view('admin.table.edit', compact('table', 'restaurants'));
+  }
+
+  /**
+   * Update data meja
+   */
+  public function update(Request $request, Table $table)
+  {
+    $request->validate([
+      'name'          => 'required|string|max:100',
+      'restaurant_id' => 'required|exists:restaurants,id',
+    ]);
+
+    $table->update([
+      'name'          => $request->name,
+      'restaurant_id' => $request->restaurant_id,
+      'is_active'     => $request->boolean('is_active', true),
+    ]);
+
+    // Regenerate QR code jika nama atau restaurant berubah
+    $newQrUrl = $table->generateQrUrl();
+    if ($table->qr_code_url !== $newQrUrl || !$table->getQrCodeImageUrl()) {
+      // Hapus QR lama
+      if ($table->qr_code_path) {
+        Storage::disk('public')->delete($table->qr_code_path);
+      }
+      // Generate yang baru
+      $qrPath = $table->generateAndSaveQrCode();
+      $table->update([
+        'qr_code_url'  => $newQrUrl,
+        'qr_code_path' => $qrPath,
+      ]);
+    }
+
+    return redirect()->route('tables.index')
+      ->with('success', "Meja \"{$table->name}\" berhasil diperbarui.");
+  }
+
+  /**
+   * Hapus meja dan QR Code-nya
+   */
+  public function destroy(Table $table)
+  {
+    // Hapus file QR code jika ada
+    if ($table->qr_code_path) {
+      Storage::disk('public')->delete($table->qr_code_path);
+    }
+
+    $name = $table->name;
+    $table->delete();
+
+    return redirect()->route('tables.index')
+      ->with('success', "Meja \"{$name}\" berhasil dihapus.");
+  }
+
+  /**
+   * Regenerate QR code untuk meja tertentu
+   */
+  public function regenerateQr(Table $table)
+  {
+    // Hapus QR lama
+    if ($table->qr_code_path) {
+      Storage::disk('public')->delete($table->qr_code_path);
+    }
+
+    // Generate baru
+    $qrUrl  = $table->generateQrUrl();
+    $qrPath = $table->generateAndSaveQrCode();
+
+    $table->update([
+      'qr_code_url'  => $qrUrl,
+      'qr_code_path' => $qrPath,
+    ]);
+
+    return redirect()->back()
+      ->with('success', "QR Code meja \"{$table->name}\" berhasil di-regenerate.");
+  }
+
+  /**
+   * Download QR code sebagai file SVG
+   */
+  public function downloadQr(Table $table)
+  {
+    if (!$table->qr_code_path || !Storage::disk('public')->exists($table->qr_code_path)) {
+      return redirect()->back()->with('error', 'QR Code tidak ditemukan. Coba regenerate.');
+    }
+
+    $filename = "qrcode-meja-{$table->name}-{$table->restaurant->name}.svg";
+    return Storage::disk('public')->download($table->qr_code_path, $filename);
+  }
+}

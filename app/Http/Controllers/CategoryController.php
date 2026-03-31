@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Models\Restaurant;
 use Illuminate\Http\Request;
 
 class CategoryController extends Controller
@@ -12,7 +13,7 @@ class CategoryController extends Controller
    */
   public function index()
   {
-    $categories = Category::all();
+    $categories = Category::with('restaurant')->orderBy('cat_name')->get();
 
     return view('admin.category.index', compact('categories'));
   }
@@ -22,7 +23,8 @@ class CategoryController extends Controller
    */
   public function create()
   {
-    return view('admin.category.create');
+    $restaurants = Restaurant::where('is_active', 1)->get();
+    return view('admin.category.create', compact('restaurants'));
   }
 
   /**
@@ -34,12 +36,14 @@ class CategoryController extends Controller
     $request->validate([
       'cat_name' => 'required|string|max:255',
       'description' => 'required|string',
+      'restaurant_id' => 'required|exists:restaurants,id',
     ]);
 
     // Simpan data kategori ke database
     Category::create([
       'cat_name' => $request->cat_name,
       'description' => $request->description,
+      'restaurant_id' => $request->restaurant_id,
     ]);
 
     // Redirect ke halaman index dengan pesan sukses
@@ -60,8 +64,9 @@ class CategoryController extends Controller
   public function edit(string $id)
   {
     $category = Category::findOrFail($id);
+    $restaurants = Restaurant::where('is_active', 1)->get();
 
-    return view('admin.category.edit', compact('category'));
+    return view('admin.category.edit', compact('category', 'restaurants'));
   }
 
   /**
@@ -73,6 +78,7 @@ class CategoryController extends Controller
     $request->validate([
       'cat_name' => 'required|string|max:255',
       'description' => 'required|string',
+      'restaurant_id' => 'required|exists:restaurants,id',
     ]);
 
     // Temukan kategori yang akan diupdate
@@ -82,6 +88,7 @@ class CategoryController extends Controller
     $category->update([
       'cat_name' => $request->cat_name,
       'description' => $request->description,
+      'restaurant_id' => $request->restaurant_id,
     ]);
 
     // Redirect ke halaman index dengan pesan sukses
