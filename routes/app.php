@@ -31,20 +31,24 @@ Route::get('/dashboard', function () {
   return view('admin.dashboard');
 })->name('dashboard');
 
-// Admin Routes
-Route::middleware('role:admin')->group(function () {
+// Super Admin Only Routes
+Route::middleware('role:super_admin')->group(function () {
+  Route::resource('roles', RoleController::class);
+  Route::resource('restaurants', RestaurantController::class);
+});
+
+// Super Admin & Admin Routes
+Route::middleware('role:super_admin|admin')->group(function () {
   Route::resource('categories', CategoryController::class);
   Route::resource('items', ItemController::class);
-  Route::resource('roles', RoleController::class);
   Route::resource('users', UserController::class);
-  Route::resource('restaurants', RestaurantController::class);
   Route::resource('tables', TableController::class);
   Route::get('/tables/{table}/download-qr', [TableController::class, 'downloadQr'])->name('tables.downloadQr');
   Route::post('/tables/{table}/regenerate-qr', [TableController::class, 'regenerateQr'])->name('tables.regenerateQr');
   Route::get('/tables/{table}/print-qr', [TableController::class, 'printQr'])->name('tables.printQr');
 });
 
-Route::middleware('role:admin|cashier|chef')->group(function () {
+Route::middleware('role:super_admin|admin|cashier|chef')->group(function () {
   Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
   Route::resource('orders', OrderController::class);
   Route::resource('items', ItemController::class);

@@ -10,7 +10,13 @@ class OrderController extends Controller
 {
   public function index()
   {
-    $orders = Order::all()->sortByDesc('created_at');
+    $query = Order::query();
+    
+    if (Auth::user()->role->role_name !== 'super_admin') {
+      $query->where('restaurant_id', Auth::user()->restaurant_id);
+    }
+    
+    $orders = $query->orderByDesc('created_at')->get();
 
     return view('admin.order.index', compact('orders'));
   }
@@ -18,6 +24,11 @@ class OrderController extends Controller
   public function show($id)
   {
     $order = Order::findOrFail($id);
+    
+    if (Auth::user()->role->role_name !== 'super_admin' && $order->restaurant_id !== Auth::user()->restaurant_id) {
+       abort(403, 'Unauthorized action.');
+    }
+    
     $orderItems = OrderItem::where('order_id', $order->id)->get();
 
     return view('admin.order.show', compact('order', 'orderItems'));
@@ -26,8 +37,12 @@ class OrderController extends Controller
   public function updateStatus($id)
   {
     $order = Order::findOrFail($id);
+    
+    if (Auth::user()->role->role_name !== 'super_admin' && $order->restaurant_id !== Auth::user()->restaurant_id) {
+       abort(403, 'Unauthorized action.');
+    }
 
-    if (Auth::user()->role->role_name == 'admin' || Auth::user()->role->role_name == 'cashier') {
+    if (Auth::user()->role->role_name == 'admin' || Auth::user()->role->role_name == 'super_admin' || Auth::user()->role->role_name == 'cashier') {
       $order->status = 'settlement';
     } elseif (Auth::user()->role->role_name == 'chef') {
       $order->status = 'cooked';

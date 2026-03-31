@@ -34,7 +34,9 @@
             <thead>
               <tr>
                 <th>No</th>
+                @if(auth()->user()->role->role_name === 'super_admin')
                 <th>Restoran</th>
+                @endif
                 <th>Nama Kategori</th>
                 <th>Deskripsi</th>
                 <th>Aksi</th>
@@ -44,7 +46,9 @@
               @foreach ($categories as $category)
                 <tr>
                   <td>{{ $loop->iteration }}</td>
+                  @if(auth()->user()->role->role_name === 'super_admin')
                   <td><span class="badge bg-secondary">{{ $category->restaurant->name ?? '-' }}</span></td>
+                  @endif
                   <td>{{ $category->cat_name }}</td>
                   <td>{{ $category->description }}</td>
                   <td class="d-flex gap-2">

@@ -30,6 +30,20 @@
         <div class="form-body">
           <div class="row">
             <div class="col-md-12">
+              @if(auth()->user()->role->role_name === 'super_admin')
+              <div class="form-group">
+                <label for="restaurant_id">Restoran</label>
+                <select id="restaurant_id" name="restaurant_id" class="form-select" required>
+                  <option value="" disabled>Pilih Restoran</option>
+                  @foreach ($restaurants as $r)
+                    <option value="{{ $r->id }}" {{ $user->restaurant_id == $r->id ? 'selected' : '' }}>{{ $r->name }}</option>
+                  @endforeach
+                </select>
+              </div>
+              @else
+              <input type="hidden" name="restaurant_id" value="{{ $user->restaurant_id }}">
+              @endif
+
               <div class="form-group">
                 <label for="fullname">Nama Karyawan</label>
                 <input type="text" class="form-control" id="fullname" placeholder="masukkan nama karyawan" name="fullname" required value="{{ $user->fullname }}">

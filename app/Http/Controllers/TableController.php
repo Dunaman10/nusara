@@ -15,13 +15,18 @@ class TableController extends Controller
   public function index()
   {
     $restaurants = Restaurant::where('is_active', true)->get();
-    $tables = Table::with('restaurant')
-      ->when(request('restaurant_id'), function ($query) {
-        $query->where('restaurant_id', request('restaurant_id'));
-      })
-      ->orderBy('restaurant_id')
-      ->orderBy('name')
-      ->get();
+    
+    $query = Table::with('restaurant');
+    
+    if (auth()->user()->role->role_name !== 'super_admin') {
+      $query->where('restaurant_id', auth()->user()->restaurant_id);
+    } else {
+      $query->when(request('restaurant_id'), function ($q) {
+        $q->where('restaurant_id', request('restaurant_id'));
+      });
+    }
+
+    $tables = $query->orderBy('restaurant_id')->orderBy('name')->get();
 
     return view('admin.table.index', compact('tables', 'restaurants'));
   }
@@ -45,12 +50,17 @@ class TableController extends Controller
       'restaurant_id' => 'required|exists:restaurants,id',
     ]);
 
+    $validatedData['name'] = $request->name;
+    $validatedData['is_active'] = $request->boolean('is_active', true);
+    
+    if (auth()->user()->role->role_name !== 'super_admin') {
+      $validatedData['restaurant_id'] = auth()->user()->restaurant_id;
+    } else {
+      $validatedData['restaurant_id'] = $request->restaurant_id;
+    }
+
     // Simpan meja dahulu untuk mendapatkan ID
-    $table = Table::create([
-      'name'          => $request->name,
-      'restaurant_id' => $request->restaurant_id,
-      'is_active'     => $request->boolean('is_active', true),
-    ]);
+    $table = Table::create($validatedData);
 
     // Generate URL QR code
     $qrUrl = $table->generateQrUrl();
@@ -73,6 +83,10 @@ class TableController extends Controller
    */
   public function show(Table $table)
   {
+    if (auth()->user()->role->role_name !== 'super_admin' && $table->restaurant_id !== auth()->user()->restaurant_id) {
+       abort(403, 'Unauthorized action.');
+    }
+    
     $table->load('restaurant');
     return view('admin.table.show', compact('table'));
   }
@@ -82,6 +96,10 @@ class TableController extends Controller
    */
   public function edit(Table $table)
   {
+    if (auth()->user()->role->role_name !== 'super_admin' && $table->restaurant_id !== auth()->user()->restaurant_id) {
+       abort(403, 'Unauthorized action.');
+    }
+    
     $restaurants = Restaurant::where('is_active', true)->get();
     return view('admin.table.edit', compact('table', 'restaurants'));
   }
@@ -96,11 +114,22 @@ class TableController extends Controller
       'restaurant_id' => 'required|exists:restaurants,id',
     ]);
 
-    $table->update([
+    if (auth()->user()->role->role_name !== 'super_admin' && $table->restaurant_id !== auth()->user()->restaurant_id) {
+       abort(403, 'Unauthorized action.');
+    }
+    
+    $updateData = [
       'name'          => $request->name,
-      'restaurant_id' => $request->restaurant_id,
       'is_active'     => $request->boolean('is_active', true),
-    ]);
+    ];
+    
+    if (auth()->user()->role->role_name !== 'super_admin') {
+      $updateData['restaurant_id'] = auth()->user()->restaurant_id;
+    } else {
+      $updateData['restaurant_id'] = $request->restaurant_id;
+    }
+
+    $table->update($updateData);
 
     // Regenerate QR code jika nama atau restaurant berubah
     $newQrUrl = $table->generateQrUrl();
@@ -126,6 +155,10 @@ class TableController extends Controller
    */
   public function destroy(Table $table)
   {
+    if (auth()->user()->role->role_name !== 'super_admin' && $table->restaurant_id !== auth()->user()->restaurant_id) {
+       abort(403, 'Unauthorized action.');
+    }
+    
     // Hapus file QR code jika ada
     if ($table->qr_code_path) {
       Storage::disk('public')->delete($table->qr_code_path);
@@ -143,6 +176,10 @@ class TableController extends Controller
    */
   public function regenerateQr(Table $table)
   {
+    if (auth()->user()->role->role_name !== 'super_admin' && $table->restaurant_id !== auth()->user()->restaurant_id) {
+       abort(403, 'Unauthorized action.');
+    }
+    
     // Hapus QR lama
     if ($table->qr_code_path) {
       Storage::disk('public')->delete($table->qr_code_path);
@@ -166,11 +203,25 @@ class TableController extends Controller
    */
   public function downloadQr(Table $table)
   {
+    if (auth()->user()->role->role_name !== 'super_admin' && $table->restaurant_id !== auth()->user()->restaurant_id) {
+       abort(403, 'Unauthorized action.');
+    }
+    
     if (!$table->qr_code_path || !Storage::disk('public')->exists($table->qr_code_path)) {
       return redirect()->back()->with('error', 'QR Code tidak ditemukan. Coba regenerate.');
     }
 
     $filename = "qrcode-meja-{$table->name}-{$table->restaurant->name}.svg";
     return Storage::disk('public')->download($table->qr_code_path, $filename);
+  }
+
+  public function printQr(Table $table)
+  {
+    if (auth()->user()->role->role_name !== 'super_admin' && $table->restaurant_id !== auth()->user()->restaurant_id) {
+       abort(403, 'Unauthorized action.');
+    }
+    
+    $table->load('restaurant');
+    return view('admin.table.print', compact('table'));
   }
 }

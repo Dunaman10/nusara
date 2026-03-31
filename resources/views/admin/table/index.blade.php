@@ -47,6 +47,7 @@
             </div>
           @endif
 
+          @if(auth()->user()->role->role_name === 'super_admin')
           <form action="{{ route('tables.index') }}" method="GET" class="mb-4">
             <div class="row align-items-end">
               <div class="col-md-4">
@@ -62,13 +63,16 @@
               </div>
             </div>
           </form>
+          @endif
 
           <table class="table table-striped" id="table1">
             <thead>
               <tr>
                 <th>No</th>
                 <th>Nama Meja</th>
+                @if(auth()->user()->role->role_name === 'super_admin')
                 <th>Restoran</th>
+                @endif
                 <th>QR Preview</th>
                 <th>Status</th>
                 <th>Aksi</th>
@@ -79,7 +83,9 @@
                 <tr>
                   <td>{{ $loop->iteration }}</td>
                   <td>{{ $table->name }}</td>
+                  @if(auth()->user()->role->role_name === 'super_admin')
                   <td>{{ $table->restaurant->name ?? '-' }}</td>
+                  @endif
                   <td>
                     @if($table->getQrCodeImageUrl())
                       <a href="{{ $table->getQrCodeImageUrl() }}" target="_blank">

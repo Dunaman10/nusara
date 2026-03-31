@@ -95,7 +95,7 @@
           </a>
         </li>
 
-        @if(Auth::user()->role->role_name === 'admin')
+        @if(in_array(Auth::user()->role->role_name, ['admin', 'super_admin']))
         <li class="sidebar-item {{ Route::is('users.*') ? 'active' : '' }}">
           <a href="{{ route('users.index') }}" class="sidebar-link">
             <i class="bi bi-people-fill"></i>
@@ -103,12 +103,15 @@
           </a>
         </li>
 
+        @if(Auth::user()->role->role_name === 'super_admin')
+        {{-- Manajemen Role --}}
         <li class="sidebar-item {{ Route::is('roles.*') ? 'active' : '' }}">
           <a href="{{ route('roles.index') }}" class="sidebar-link">
             <i class="bi bi-person-fill-gear"></i>
             <span>Manajemen Role</span>
           </a>
         </li>
+        @endif
 
         <li class="sidebar-item {{ Route::is('categories.*') ? 'active' : '' }}">
           <a href="{{ route('categories.index') }}" class="sidebar-link">
@@ -117,12 +120,14 @@
           </a>
         </li>
 
+        @if(Auth::user()->role->role_name === 'super_admin')
         <li class="sidebar-item {{ Route::is('restaurants.*') ? 'active' : '' }}">
           <a href="{{ route('restaurants.index') }}" class="sidebar-link">
             <i class="bi bi-shop"></i>
             <span>Manajemen Restoran</span>
           </a>
         </li>
+        @endif
 
         <li class="sidebar-item {{ Route::is('tables.*') ? 'active' : '' }}">
           <a href="{{ route('tables.index') }}" class="sidebar-link">

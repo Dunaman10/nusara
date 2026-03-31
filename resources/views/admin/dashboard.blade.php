@@ -6,7 +6,12 @@
 
 @section('content')
 <div class="page-heading">
-  <h3>Selamat Datang, {{ Auth::user()->fullname }} - {{ Auth::user()->role->role_name }}</h3>
+  <h3>
+    Selamat Datang, {{ Auth::user()->fullname }} - {{ Auth::user()->role->role_name }}
+    @if(Auth::user()->role->role_name !== 'super_admin' && Auth::user()->restaurant)
+      <span class="fs-5 text-muted">({{ Auth::user()->restaurant->name }})</span>
+    @endif
+  </h3>
 </div>
 <div class="page-content">
   <section class="row">

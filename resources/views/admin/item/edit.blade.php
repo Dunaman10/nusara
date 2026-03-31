@@ -30,6 +30,7 @@
         <div class="form-body">
           <div class="row">
             <div class="col-md-12">
+              @if(auth()->user()->role->role_name === 'super_admin')
               <div class="form-group">
                 <label for="restaurant_id">Restoran</label>
                 <select id="restaurant_id" name="restaurant_id" class="form-select" required>
@@ -39,6 +40,9 @@
                   @endforeach
                 </select>
               </div>
+              @else
+              <input type="hidden" name="restaurant_id" value="{{ $item->restaurant_id }}">
+              @endif
 
               <div class="form-group">
                 <label for="name">Nama Menu</label>

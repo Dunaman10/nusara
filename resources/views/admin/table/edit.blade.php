@@ -37,6 +37,7 @@
             @method('PUT')
             <div class="form-body">
               <div class="row">
+                @if(auth()->user()->role->role_name === 'super_admin')
                 <div class="col-md-6">
                   <div class="form-group">
                     <label for="restaurant_id">Restoran</label>
@@ -50,6 +51,9 @@
                     </select>
                   </div>
                 </div>
+                @else
+                <input type="hidden" name="restaurant_id" value="{{ $table->restaurant_id }}">
+                @endif
                 
                 <div class="col-md-6">
                   <div class="form-group">

@@ -14,7 +14,13 @@ class ItemController extends Controller
    */
   public function index()
   {
-    $items = Item::with(['category', 'restaurant'])->orderBy('name', 'asc')->get();
+    $query = Item::with(['category', 'restaurant'])->orderBy('name', 'asc');
+    
+    if (auth()->user()->role->role_name !== 'super_admin') {
+      $query->where('restaurant_id', auth()->user()->restaurant_id);
+    }
+    
+    $items = $query->get();
 
     return view('admin.item.index', compact('items'));
   }
@@ -24,8 +30,12 @@ class ItemController extends Controller
    */
   public function create()
   {
+    $categoryQuery = Category::with('restaurant')->orderBy('cat_name', 'asc');
+    if (auth()->user()->role->role_name !== 'super_admin') {
+      $categoryQuery->where('restaurant_id', auth()->user()->restaurant_id);
+    }
+    $categories = $categoryQuery->get();
 
-    $categories = Category::with('restaurant')->orderBy('cat_name', 'asc')->get();
     $restaurants = Restaurant::where('is_active', 1)->get();
 
     return view('admin.item.create', compact('categories', 'restaurants'));
@@ -68,6 +78,11 @@ class ItemController extends Controller
       $validatedData['img'] = $imageName;
     }
 
+    // Use logged in user's restaurant_id if not super_admin
+    if (auth()->user()->role->role_name !== 'super_admin') {
+      $validatedData['restaurant_id'] = auth()->user()->restaurant_id;
+    }
+
     // Create the item using the validated data
     Item::create($validatedData);
 
@@ -89,7 +104,18 @@ class ItemController extends Controller
   public function edit(string $id)
   {
     $item = Item::findOrFail($id);
-    $categories = Category::orderBy('cat_name', 'asc')->get();
+    
+    // Prevent unauthorized access
+    if (auth()->user()->role->role_name !== 'super_admin' && $item->restaurant_id !== auth()->user()->restaurant_id) {
+       abort(403, 'Unauthorized action.');
+    }
+
+    $categoryQuery = Category::orderBy('cat_name', 'asc');
+    if (auth()->user()->role->role_name !== 'super_admin') {
+      $categoryQuery->where('restaurant_id', auth()->user()->restaurant_id);
+    }
+    $categories = $categoryQuery->get();
+    
     $restaurants = Restaurant::where('is_active', 1)->get();
 
     return view('admin.item.edit', compact('item', 'categories', 'restaurants'));
@@ -136,6 +162,16 @@ class ItemController extends Controller
       $validatedData['img'] = $imageName;
     }
 
+    // Prevent unauthorized access
+    if (auth()->user()->role->role_name !== 'super_admin' && $item->restaurant_id !== auth()->user()->restaurant_id) {
+       abort(403, 'Unauthorized action.');
+    }
+
+    // Use logged in user's restaurant_id if not super_admin
+    if (auth()->user()->role->role_name !== 'super_admin') {
+      $validatedData['restaurant_id'] = auth()->user()->restaurant_id;
+    }
+
     // Update the item with the validated data
     $item->update($validatedData);
 
@@ -150,6 +186,10 @@ class ItemController extends Controller
   {
     // Find the item by ID
     $item = Item::findOrFail($id);
+    
+    if (auth()->user()->role->role_name !== 'super_admin' && $item->restaurant_id !== auth()->user()->restaurant_id) {
+       abort(403, 'Unauthorized action.');
+    }
 
     // Delete the item
     $item->delete();
@@ -161,6 +201,11 @@ class ItemController extends Controller
   public function updateStatus($id)
   {
     $item = Item::findOrFail($id);
+    
+    if (auth()->user()->role->role_name !== 'super_admin' && $item->restaurant_id !== auth()->user()->restaurant_id) {
+       abort(403, 'Unauthorized action.');
+    }
+    
     $item->is_active = !$item->is_active; // Toggle the status
     $item->save();
 

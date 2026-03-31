@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Role;
+use App\Models\Restaurant;
 use Illuminate\Http\Request;
 
 class UserController extends Controller
@@ -13,9 +14,15 @@ class UserController extends Controller
    */
   public function index()
   {
-    $users = User::whereHas('role', function ($query) {
+    $query = User::with('restaurant')->whereHas('role', function ($query) {
       $query->where('role_name', '!=', 'customer');
-    })->orderBy('fullname')->get();
+    });
+    
+    if (auth()->user()->role->role_name !== 'super_admin') {
+      $query->where('restaurant_id', auth()->user()->restaurant_id);
+    }
+
+    $users = $query->orderBy('fullname')->get();
     return view('admin.user.index', compact('users'));
   }
 
@@ -25,9 +32,17 @@ class UserController extends Controller
   public function create()
   {
     $users = User::all();
-    $roles = Role::where('role_name', '!=', 'customer')->get();
+    $roles = Role::where('role_name', '!=', 'customer');
+    
+    // Admin cannot create super_admins
+    if (auth()->user()->role->role_name !== 'super_admin') {
+      $roles->where('role_name', '!=', 'super_admin');
+    }
+    
+    $roles = $roles->get();
+    $restaurants = Restaurant::where('is_active', 1)->get();
 
-    return view('admin.user.create', compact('users', 'roles'));
+    return view('admin.user.create', compact('users', 'roles', 'restaurants'));
   }
 
   /**
@@ -43,6 +58,7 @@ class UserController extends Controller
       'phone' => 'required|unique:users,phone',
       'role_id' => 'required|exists:roles,id',
       'password' => 'required|confirmed|min:6',
+      'restaurant_id' => auth()->user()->role->role_name === 'super_admin' ? 'required|exists:restaurants,id' : 'nullable',
     ]);
 
     // Create a new user
@@ -53,6 +69,7 @@ class UserController extends Controller
       'phone' => $request->phone,
       'role_id' => $request->role_id,
       'password' => bcrypt($request->password),
+      'restaurant_id' => auth()->user()->role->role_name === 'super_admin' ? $request->restaurant_id : auth()->user()->restaurant_id,
     ]);
 
     // Redirect to the user index page with a success message
@@ -73,9 +90,21 @@ class UserController extends Controller
   public function edit(string $id)
   {
     $user = User::findOrFail($id);
-    $roles = Role::all();
+    
+    // Prevent unauthorized access
+    if (auth()->user()->role->role_name !== 'super_admin' && $user->restaurant_id !== auth()->user()->restaurant_id) {
+       abort(403, 'Unauthorized action.');
+    }
+    
+    $roles = Role::where('role_name', '!=', 'customer');
+    if (auth()->user()->role->role_name !== 'super_admin') {
+      $roles->where('role_name', '!=', 'super_admin');
+    }
+    $roles = $roles->get();
+    
+    $restaurants = Restaurant::where('is_active', 1)->get();
 
-    return view('admin.user.edit', compact('user', 'roles'));
+    return view('admin.user.edit', compact('user', 'roles', 'restaurants'));
   }
 
   /**
@@ -90,15 +119,23 @@ class UserController extends Controller
       'phone' => 'required|unique:users,phone,' . $id,
       'role_id' => 'required|exists:roles,id',
       'password' => 'nullable|confirmed|min:6',
+      'restaurant_id' => auth()->user()->role->role_name === 'super_admin' ? 'required|exists:restaurants,id' : 'nullable',
     ]);
 
     $user = User::findOrFail($id);
+    
+    // Prevent unauthorized access
+    if (auth()->user()->role->role_name !== 'super_admin' && $user->restaurant_id !== auth()->user()->restaurant_id) {
+       abort(403, 'Unauthorized action.');
+    }
+    
     $data = [
       'username' => $request->username,
       'fullname' => $request->fullname,
       'email' => $request->email,
       'phone' => $request->phone,
       'role_id' => $request->role_id,
+      'restaurant_id' => auth()->user()->role->role_name === 'super_admin' ? $request->restaurant_id : auth()->user()->restaurant_id,
     ];
 
     if ($request->filled('password')) {
@@ -116,6 +153,12 @@ class UserController extends Controller
   public function destroy(string $id)
   {
     $user = User::findOrFail($id);
+    
+    // Prevent unauthorized access
+    if (auth()->user()->role->role_name !== 'super_admin' && $user->restaurant_id !== auth()->user()->restaurant_id) {
+       abort(403, 'Unauthorized action.');
+    }
+    
     $user->delete();
 
     return redirect()->route('users.index')->with('success', 'User berhasil dihapus.');

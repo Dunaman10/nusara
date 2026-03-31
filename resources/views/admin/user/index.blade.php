@@ -39,6 +39,9 @@
                 <th>Email</th>
                 <th>No.Telp</th>
                 <th>Role</th>
+                @if(auth()->user()->role->role_name === 'super_admin')
+                <th>Restoran</th>
+                @endif
                 <th>Aksi</th>
               </tr>
             </thead>
@@ -51,6 +54,9 @@
                   <td>{{ $user->email }}</td>
                   <td>{{ $user->phone }}</td>
                   <td>{{ $user->role->role_name }}</td>
+                  @if(auth()->user()->role->role_name === 'super_admin')
+                  <td><span class="badge bg-secondary">{{ $user->restaurant->name ?? '-' }}</span></td>
+                  @endif
                   <td class="d-flex gap-2">
                     <a href="{{ route('users.edit', $user->id) }}" class="btn btn-warning btn-sm">
                       <i class="bi bi-pencil"></i> Ubah
