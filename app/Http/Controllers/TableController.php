@@ -15,9 +15,9 @@ class TableController extends Controller
   public function index()
   {
     $restaurants = Restaurant::where('is_active', true)->get();
-    
+
     $query = Table::with('restaurant');
-    
+
     if (auth()->user()->role->role_name !== 'super_admin') {
       $query->where('restaurant_id', auth()->user()->restaurant_id);
     } else {
@@ -52,7 +52,7 @@ class TableController extends Controller
 
     $validatedData['name'] = $request->name;
     $validatedData['is_active'] = $request->boolean('is_active', true);
-    
+
     if (auth()->user()->role->role_name !== 'super_admin') {
       $validatedData['restaurant_id'] = auth()->user()->restaurant_id;
     } else {
@@ -84,9 +84,9 @@ class TableController extends Controller
   public function show(Table $table)
   {
     if (auth()->user()->role->role_name !== 'super_admin' && $table->restaurant_id !== auth()->user()->restaurant_id) {
-       abort(403, 'Unauthorized action.');
+      abort(403, 'Unauthorized action.');
     }
-    
+
     $table->load('restaurant');
     return view('admin.table.show', compact('table'));
   }
@@ -97,9 +97,9 @@ class TableController extends Controller
   public function edit(Table $table)
   {
     if (auth()->user()->role->role_name !== 'super_admin' && $table->restaurant_id !== auth()->user()->restaurant_id) {
-       abort(403, 'Unauthorized action.');
+      abort(403, 'Unauthorized action.');
     }
-    
+
     $restaurants = Restaurant::where('is_active', true)->get();
     return view('admin.table.edit', compact('table', 'restaurants'));
   }
@@ -115,14 +115,14 @@ class TableController extends Controller
     ]);
 
     if (auth()->user()->role->role_name !== 'super_admin' && $table->restaurant_id !== auth()->user()->restaurant_id) {
-       abort(403, 'Unauthorized action.');
+      abort(403, 'Unauthorized action.');
     }
-    
+
     $updateData = [
       'name'          => $request->name,
       'is_active'     => $request->boolean('is_active', true),
     ];
-    
+
     if (auth()->user()->role->role_name !== 'super_admin') {
       $updateData['restaurant_id'] = auth()->user()->restaurant_id;
     } else {
@@ -156,9 +156,9 @@ class TableController extends Controller
   public function destroy(Table $table)
   {
     if (auth()->user()->role->role_name !== 'super_admin' && $table->restaurant_id !== auth()->user()->restaurant_id) {
-       abort(403, 'Unauthorized action.');
+      abort(403, 'Unauthorized action.');
     }
-    
+
     // Hapus file QR code jika ada
     if ($table->qr_code_path) {
       Storage::disk('public')->delete($table->qr_code_path);
@@ -177,9 +177,9 @@ class TableController extends Controller
   public function regenerateQr(Table $table)
   {
     if (auth()->user()->role->role_name !== 'super_admin' && $table->restaurant_id !== auth()->user()->restaurant_id) {
-       abort(403, 'Unauthorized action.');
+      abort(403, 'Unauthorized action.');
     }
-    
+
     // Hapus QR lama
     if ($table->qr_code_path) {
       Storage::disk('public')->delete($table->qr_code_path);
@@ -204,9 +204,9 @@ class TableController extends Controller
   public function downloadQr(Table $table)
   {
     if (auth()->user()->role->role_name !== 'super_admin' && $table->restaurant_id !== auth()->user()->restaurant_id) {
-       abort(403, 'Unauthorized action.');
+      abort(403, 'Unauthorized action.');
     }
-    
+
     if (!$table->qr_code_path || !Storage::disk('public')->exists($table->qr_code_path)) {
       return redirect()->back()->with('error', 'QR Code tidak ditemukan. Coba regenerate.');
     }
@@ -218,9 +218,9 @@ class TableController extends Controller
   public function printQr(Table $table)
   {
     if (auth()->user()->role->role_name !== 'super_admin' && $table->restaurant_id !== auth()->user()->restaurant_id) {
-       abort(403, 'Unauthorized action.');
+      abort(403, 'Unauthorized action.');
     }
-    
+
     $table->load('restaurant');
     return view('admin.table.print', compact('table'));
   }
